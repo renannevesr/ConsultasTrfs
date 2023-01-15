@@ -1,8 +1,9 @@
-import time
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
-def trf16_consulta(cpfId, trf1,trf6,driver):
-    pje = [trf1, trf6]
+def trf16_consulta(cpfId,trf1,trf3,trf6,driver,time):
+    pje = [trf1,trf3, trf6]
     for trf in pje:
         driver.get(trf)
         cpf = str(cpfId)
@@ -16,15 +17,27 @@ def trf16_consulta(cpfId, trf1,trf6,driver):
         time.sleep(1)
         if trf == 'https://pje1g.trf3.jus.br/pje/ConsultaPublica/listView.seam':
             div = 5
+            id_cases = 220
         else:
             div = 6
         driver.find_element(By.XPATH, f"/ html / body / div[{div}] / div / div / div / div[2] / form / div[1] / div / div / div / div / div[6] / div[2] / input").send_keys(cpfCorrigido)
         driver.find_element(By.XPATH, f"/ html / body / div[{div}] / div / div / div / div[2] / form / div[1] / div / div / div / div / div[8] / div / input").click()
-        time.sleep(6)
+        time.sleep(1)
+        while lines_cpf>0:
+            try:
+                loading =len(driver.find_element(By.XPATH, f'/html/body/div[{div}]/div/div/div/div[2]/form/div[2]').get_attribute('innerHTML'))
+                print(loading)
+            except:
+                loading = 0
+            if loading ==0 or loading >1709:
+                print("a")
+                break
         if trf == 'https://pje1g.trf1.jus.br/consultapublica/ConsultaPublica/listView.seam':
-            num_cases = driver.find_element(By.XPATH,'// *[ @ id = "fPP:processosTable:j_id223"] / div / span').text
+            id_cases = 223
+
         else:
-            num_cases = driver.find_element(By.XPATH,'// *[ @ id = "fPP:processosTable:j_id230"] / div / span').text
+            id_cases = 230
+        num_cases = driver.find_element(By.XPATH,f'/html/body/div[{div}]/div/div/div/div[2]/form/div[2]/div/table/tfoot/tr/td/div/div/span').text
         cases = num_cases[0]
         len_cases = 0
         try:
@@ -37,7 +50,7 @@ def trf16_consulta(cpfId, trf1,trf6,driver):
             while idx <= len_cases:
                 idx_character = 0
                 processo = driver.find_element(By.XPATH,
-                                               f"/html/body/div[6]/div/div/div/div[2]/form/div[2]/div/table/tbody/tr[{idx}]/td[2]")
+                                               f"/html/body/div[{div}]/div/div/div/div[2]/form/div[2]/div/table/tbody/tr[{idx}]/td[2]")
                 process_full =processo.text
                 split_process =process_full.split("\n")
                 partes = split_process[2]

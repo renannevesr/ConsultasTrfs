@@ -2,12 +2,16 @@ import time
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import Trf16
+import Trf136
+import Trf5
+import re
+
 
 chrome_options = webdriver.ChromeOptions()
 # chrome_options.add_argument('--headless')
 chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
+chrome_options.add_argument("--disable-blink-features=AutomationControlled")
 driver = webdriver.Chrome('chromedriver', chrome_options=chrome_options)
 
 trf6 = 'https://pje1g.trf6.jus.br/consultapublica/ConsultaPublica/listView.seam'
@@ -27,6 +31,10 @@ if __name__ == "__main__":
     while idx < rows:
         print("idx do for=", idx)
         cpfId = df.loc[idx, 'CPF']
-        Trf16.trf16_consulta(cpfId, trf1,trf6,driver)
-        #trf16_consulta(cpfId)
+        if type(cpfId) != int:
+            #print("entrou if regex")
+            cpfId = int(re.sub(r'[.-]', '', cpfId))
+        #print(cpfId)
+        Trf136.trf16_consulta(cpfId,trf1,trf3,trf6,driver,time)
+        Trf5.trf5_consulta(cpfId, trf5,driver,time,By)
         idx+=1
